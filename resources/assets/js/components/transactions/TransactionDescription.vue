@@ -34,7 +34,6 @@
             class="form-control"
             name="description[]"
             type="text"
-            v-bind:placeholder="$t('firefly.description')"
             @input="handleInput"
             v-on:keypress="handleEnter" v-on:submit.prevent
         >
@@ -47,6 +46,7 @@
         </span>
       </div>
       <typeahead
+          v-if=false
           v-model="name"
           :async-function="aSyncFunction"
           :open-on-empty=true

@@ -78,11 +78,7 @@
               </td>
             </tr>
             </tbody>
-          </table>
-
-          <div style="padding:8px;">
-            <a href="webhooks/create" class="btn btn-success"><span class="fa fa-plus fa-fw"></span>{{ $t('firefly.create_new_webhook') }}</a>
-          </div>
+          </table>          
         </div>
       </div>
     </div>

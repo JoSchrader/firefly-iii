@@ -21,7 +21,7 @@
 <template>
   <div class="form-group" v-bind:class="{ 'has-error': hasError()}">
     <div class="col-sm-12 text-sm">
-      {{ $t('firefly.split_transaction_title') }}
+      Gesamtbeschreibung
     </div>
     <div class="col-sm-12">
       <div class="input-group">
@@ -33,7 +33,6 @@
             class="form-control"
             name="group_title"
             type="text"
-            v-bind:placeholder="$t('firefly.split_transaction_title')"
             v-bind:title="$t('firefly.split_transaction_title')" @input="handleInput"
         >
         <span class="input-group-btn">
@@ -44,7 +43,7 @@
                 v-on:click="clearField"><i class="fa fa-trash-o"></i></button>
         </span>
       </div>
-      <p v-if="error.length === 0" class="help-block">
+      <p v-show=false v-if="error.length === 0" class="help-block">
         {{ $t('firefly.split_transaction_title_help') }}
       </p>
       <ul v-for="error in this.error" class="list-unstyled">

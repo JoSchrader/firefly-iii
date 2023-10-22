@@ -138,6 +138,7 @@ export default {
   methods:
       {
         aSyncFunction: function (query, done) {
+          query = '';
           axios.get(this.accountAutoCompleteURI + query)
               .then(res => {
                 done(res.data);

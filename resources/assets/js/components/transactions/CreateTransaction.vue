@@ -19,8 +19,29 @@
   -->
 
 <template>
-    <form accept-charset="UTF-8" class="form-horizontal" enctype="multipart/form-data">
+    <form accept-charset="UTF-8" class="form-horizontal transactions-form" enctype="multipart/form-data">
+        <div>
+            <input id='jonasSimplify' type="checkbox" v-model="jonasSimplify" style="cursor:pointer;">
+            <label for="jonasSimplify" style="cursor:pointer;">Vereinfachen</label>
+        </div>
         <input name="_token" type="hidden" value="xxx">
+        <div class="row" :style="{opacity:transactions.length > 1?1:0.65}">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <div class="box">
+                    <div v-show=false class="box-header with-border">
+                        <h3 class="box-title">
+                            Gesamtbeschreibung
+                        </h3>
+                    </div>
+                    <div class="box-body">
+                        <group-description
+                            v-model="group_title"
+                            :error="group_title_errors"
+                        ></group-description>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div v-if="error_message !== ''" class="row">
             <div class="col-lg-12">
                 <div class="alert alert-danger alert-dismissible" role="alert">
@@ -94,17 +115,17 @@
                                         v-on:clear:value="clearDestination(index)"
                                         v-on:select:account="selectedDestinationAccount(index, $event)"
                                     ></account-select>
-                                    <p v-if="0!== index && (null === transactionType || 'invalid' === transactionType || '' === transactionType)"
+                                    <p v-show="!jonasSimplify" v-if="0!== index && (null === transactionType || 'invalid' === transactionType || '' === transactionType)"
                                        class="text-warning">
                                         {{ $t('firefly.multi_account_warning_unknown') }}
                                     </p>
-                                    <p v-if="0!== index && 'Withdrawal' === transactionType" class="text-warning">
+                                    <p v-show="!jonasSimplify" v-if="0!== index && 'Withdrawal' === transactionType" class="text-warning">
                                         {{ $t('firefly.multi_account_warning_withdrawal') }}
                                     </p>
-                                    <p v-if="0!== index && 'Deposit' === transactionType" class="text-warning">
+                                    <p v-show="!jonasSimplify" v-if="0!== index && 'Deposit' === transactionType" class="text-warning">
                                         {{ $t('firefly.multi_account_warning_deposit') }}
                                     </p>
-                                    <p v-if="0!== index && 'Transfer' === transactionType" class="text-warning">
+                                    <p v-show="!jonasSimplify" v-if="0!== index && 'Transfer' === transactionType" class="text-warning">
                                         {{ $t('firefly.multi_account_warning_transfer') }}
                                     </p>
                                     <standard-date v-if="0===index"
@@ -113,7 +134,7 @@
                                                    :index="index"
                                     >
                                     </standard-date>
-                                    <div v-if="index===0">
+                                    <div v-show="!jonasSimplify" v-if="index===0">
                                         <transaction-type
                                             :destination="transaction.destination_account.type"
                                             :source="transaction.source_account.type"
@@ -132,6 +153,7 @@
                                         :transactionType="transactionType"
                                     ></amount>
                                     <foreign-amount
+                                        v-show="!jonasSimplify"
                                         v-model="transaction.foreign_amount"
                                         :destination="transaction.destination_account"
                                         :error="transaction.errors.foreign_amount"
@@ -153,6 +175,7 @@
                                         :transactionType="transactionType"
                                     ></category>
                                     <piggy-bank
+                                        v-show="!jonasSimplify"
                                         v-model="transaction.piggy_bank"
                                         :error="transaction.errors.piggy_bank"
                                         :no_piggy_bank="$t('firefly.no_piggy_bank')"
@@ -163,12 +186,14 @@
                                         :error="transaction.errors.tags"
                                     ></tags>
                                     <bill
+                                        v-show="!jonasSimplify"
                                         v-model="transaction.bill"
                                         :error="transaction.errors.bill_id"
                                         :no_bill="$t('firefly.none_in_select_list')"
                                         :transactionType="transactionType"
                                     ></bill>
                                     <custom-transaction-fields
+                                        v-show="!jonasSimplify"
                                         v-model="transaction.custom_fields"
                                         :error="transaction.errors.custom_errors"
                                     ></custom-transaction-fields>
@@ -184,24 +209,17 @@
                 </div>
             </div>
         </div>
-        <div v-if="transactions.length > 1" class="row">
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                <div class="box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">
-                            {{ $t('firefly.split_transaction_title') }}
-                        </h3>
-                    </div>
-                    <div class="box-body">
-                        <group-description
-                            v-model="group_title"
-                            :error="group_title_errors"
-                        ></group-description>
-                    </div>
-                </div>
+        <div v-show="jonasSimplify" style="display: flex; flex-direction: row-reverse; margin-top: 10px">
+            <div class="btn-group">
+                <button id="submitButton" class="btn btn-success" @click="submit">{{
+                        $t('firefly.submit')
+                    }}
+                </button>
             </div>
+            <p class="text-success" v-html="success_message"></p>
+            <p class="text-danger" v-html="error_message"></p>
         </div>
-        <div class="row">
+        <div v-show="!jonasSimplify" class="row">
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
@@ -867,6 +885,20 @@ export default {
                 // call for extra clear thing:
                 // this.clearSource(0);
                 //this.clearDestination(0);
+
+                // Set default accounts
+                this.transactions[0]['source_account']['id'] = 1;
+                this.transactions[0]['source_account']['name'] = 'Giro Konto';                
+                this.transactions[0]['destination_account']['id'] = 17;
+                this.transactions[0]['destination_account']['name'] = 'Supermarkt';
+                this.setTransactionType('withdrawal')
+            }
+            if (this.transactions.length > 1) {        
+                const i=this.transactions.length;        
+                this.transactions[i-1]['source_account']['id'] = this.transactions[i-2]['source_account']['id'];
+                this.transactions[i-1]['source_account']['name'] = this.transactions[i-2]['source_account']['name']; 
+                this.transactions[i-1]['destination_account']['id'] = this.transactions[i-2]['destination_account']['id'];
+                this.transactions[i-1]['destination_account']['name'] =  this.transactions[i-2]['destination_account']['name'];
             }
             if (e) {
                 e.preventDefault();
@@ -1007,6 +1039,7 @@ export default {
             applyRules: true,
             resetButtonDisabled: true,
             attachmentCount: 0,
+            jonasSimplify: true,
         };
     },
 }

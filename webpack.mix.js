@@ -45,3 +45,5 @@ mix.js('resources/assets/js/webhooks/index.js', 'public/v1/js/webhooks').vue({ve
 mix.js('resources/assets/js/webhooks/create.js', 'public/v1/js/webhooks').vue({version: 2});
 mix.js('resources/assets/js/webhooks/edit.js', 'public/v1/js/webhooks').vue({version: 2});
 mix.js('resources/assets/js/webhooks/show.js', 'public/v1/js/webhooks').vue({version: 2});
+
+mix.sass('resources/assets/sass/app.scss', 'public/v1/css/app.css');
